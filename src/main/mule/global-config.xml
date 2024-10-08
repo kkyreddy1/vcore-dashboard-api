@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="fb11109e-2087-424a-a93c-ae309340e848" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="9c8cd4b0-3f2d-43ff-b4af-0550a557de71" file="app.properties" />
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="683cbe56-600b-429c-89c5-54239e246481" basePath="${https.basepath}" enableCookies="false">
+		<http:request-connection protocol="HTTPS" host="${https.token.host}" port="${https.token.port}">
+		</http:request-connection>
+	</http:request-config>
+	<os:object-store name="Object_store" doc:name="Object store" doc:id="a7d224dd-70eb-4032-a8ed-42179a395d98" expirationInterval="60" />
+	<http:request-config name="HTTP_Org_Request_configuration" doc:name="HTTP Request configuration" doc:id="04bcf543-b8a7-4852-9b81-4533740f9fcd" basePath="${https.org.basepath}" >
+		<http:request-connection protocol="HTTPS" host="${https.org.host}" port="${https.org.port}" />
+	</http:request-config>
+	<http:request-config name="HTTP_Env_Request" doc:name="HTTP Request configuration" doc:id="8933916b-1a9d-4830-9f07-378627afc268">
+		<http:request-connection protocol="HTTPS"/>
+	</http:request-config>
+	<configuration doc:name="Configuration" doc:id="84d1818d-f901-440e-ab57-c43afd8dff90" defaultErrorHandler-ref="global-Error_Handler" />
+</mule>
