@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="sample-pocFlow" doc:id="7c785286-4466-4c8d-a221-95dd6c0d4dc1" >
+		<http:listener doc:name="Listener" doc:id="15a9ff49-ceef-482f-bfa8-e53f7c8fed01" config-ref="HTTP_Listener_config" path="/dashboard/vcore">
+			<http:response >
+				<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Access-Control-Allow-Origin" : "*"
+}]]]></http:headers>
+			</http:response>
+		</http:listener>
+		<set-variable value="#[attributes.queryParams.LOB]" doc:name="LineOfbusiness" doc:id="085bacc4-0ccf-40ea-824d-271328af026c" variableName="LineOfbusiness"/>
+		<http:request method="POST" doc:name="AccessTokenRequest" doc:id="c02a5f70-c7e7-4980-abc4-479d01781de7" outputMimeType="application/json" config-ref="HTTP_Request_configuration" path="/">
+			<http:body><![CDATA[#[%dw 2.0
+output application/json
+---
+{
+    "username": "kkyreddy1",
+    "password": "K@nneluruking101"
+}]]]></http:body>
+		</http:request>
+		<set-variable value="#[payload.access_token]" doc:name="bearertoken" doc:id="ef51f7f8-317a-4da8-829f-5fe4ed229b32" variableName="bearertoken"/>
+		<logger level="INFO" doc:name="Logger" doc:id="62cc85fe-e2dc-4970-8360-ad9128563a2c" message="#[vars.bearertoken]"/>
+		<http:request method="GET" doc:name="OrganizationIdRequest" doc:id="145da36f-1e9e-49c3-a13f-775a35324091" config-ref="HTTP_Org_Request_configuration" path="/">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Authorization" : "Bearer " ++ vars.bearertoken
+}]]]></http:headers>
+		</http:request>
+		<set-variable value="#[payload.user.organizationId]" doc:name="orgId" doc:id="753e0c27-76b1-40fc-9c77-f4a24c3fa2b2" variableName="orgId"/>
+		<logger level="INFO" doc:name="Logger" doc:id="39770b4a-b17c-439d-a300-8179c601379e" message="#[vars.orgId]"/>
+		<ee:transform doc:name="basepath" doc:id="3bf2e338-617e-4a27-a56e-ba4a78989b10" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="basepath" ><![CDATA[%dw 2.0
+output application/java
+---
+"/accounts/api/organizations/" ++ vars.orgId ++ "/environments"]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<http:request method="GET" doc:name="EnvironmentId-Request" doc:id="e3ae320c-f98a-4903-ae74-e837dd6e89de" url='#["https://anypoint.mulesoft.com/" ++ vars.basepath]'>
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Authorization" : "Bearer " ++ vars.bearertoken
+}]]]></http:headers>
+		</http:request>
+		<ee:transform doc:name="filter payload" doc:id="abd26e15-aee1-4566-91d9-3d21b8232342" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.data filter(($.name == "Prod") or ($.name == "Non-Prod")) map((item,index) ->
+{
+	"name": item.name,
+	"id" : item.id
+	
+})
+	
+
+ 
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="ec2d1895-3d05-4e9c-b83f-b38a331cee4a" message="#[payload]"/>
+<!-- [STUDIO:"Env-Ids"]		<ee:transform doc:name="Env-Ids" doc:id="39581462-78e4-4678-953e-fb6516e7ec28" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+payload map{
+	id: $.id
+}
+]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="envname" ><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+payload map{
+	name: $.name
+}
+]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform> [STUDIO] -->
+<!-- [STUDIO:"Logger"]		<logger level="INFO" doc:name="Logger" doc:id="4fa5e798-31de-4f47-b84b-1531034e9080" message="#[payload]"/> [STUDIO] -->
+		<ee:transform doc:name="Transform Message" doc:id="f6ac4ff5-be93-4a97-ac94-c2d47446eb1a" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="foutput" ><![CDATA[%dw 2.0
+output application/json
+---
+[]]]></ee:set-variable>
+				<ee:set-variable variableName="domainNames" ><![CDATA[%dw 2.0
+output application/json
+var domainNames = "sales,supplychain,marketing"
+---
+domainNames splitBy "," map (value) -> {
+    department: value
+}
+]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="b949c83e-b9ca-4e24-b76d-6c8ac697660f" message="#[vars.domainNames]"/>
+		<foreach doc:name="For Each" doc:id="e27fba04-49ca-4b86-bd15-e835caedeb25" collection="#[payload]">
+			<ee:transform doc:name="Transform Message" doc:id="3bd49772-e63b-45df-aede-e68dd09c6d09">
+				<ee:message>
+				</ee:message>
+				<ee:variables>
+					<ee:set-variable variableName="envname" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.name]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<http:request method="GET" doc:name="listOfAPI's-based on Env-Request" doc:id="278180f6-5a84-4a87-a8da-8db3cbfd889e" url="https://anypoint.mulesoft.com/cloudhub/api/applications">
+					<http:headers><![CDATA[#[output application/java
+---
+{
+	"x-anypnt-org-id" : vars.orgId,
+	"x-anypnt-env-id" : payload.id,
+	"authorization" : "Bearer " ++ vars.bearertoken
+}]]]></http:headers>
+				</http:request>
+			<choice doc:name="Choice" doc:id="4f4af4c5-84d2-409b-9fce-7b8604495c7a">
+			<when expression='#[vars.LineOfBusiness == "sales" or vars.LineOfBusiness == "marketing" or vars.LineOfBusiness == "supplychain"]'>
+				<ee:transform doc:name="listOfAPI's-based on Env" doc:id="e784430f-d9f7-4384-8d65-0f2f8e415caa">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="vcore"><![CDATA[%dw 2.0
+
+var c=payload map ((item, index) -> {
+"workerType": item.workerType,
+"domain": item.domain,
+"status": item.status,
+}) filter ((item, index) ->  item.domain contains /*startsWith*/ (vars.LineOfBusiness))
+
+output application/json  
+
+---
+
+c filter ((item, index) ->item.status =="STARTED" ) map ((item, index) -> item.workerType)]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+					<ee:transform doc:name="count vcores" doc:id="7f944277-7993-402a-b0b9-e0a8ec41ba0a">
+			<ee:message>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="totalvcores"><![CDATA[%dw 2.0
+output application/json
+var a=vars.vcore
+var propertiesContent = readUrl("classpath://app.properties", "application/properties")
+var valueMap = propertiesContent
+fun calculateSum(values) = values map(valueMap[$] default 0) reduce ((val,acc) -> val + acc)
+---
+calculateSum(a)]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+					<ee:transform doc:name="output" doc:id="03b5b08f-8ff3-4603-8ddf-7486213c24a8">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[{
+	"Line of Business": if (vars.LineOfBusiness != null) vars.LineOfBusiness else "All" ,
+	"Environment": vars.envname,
+	"No.Of API'S" : sizeOf(vars.vcore),
+	"vCoresUsed" : (vars.totalvcores) as String default 0 as String ++ " vcores"
+}]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+					<ee:transform doc:name="Transform Message" doc:id="d8810da2-42ce-48bb-9272-51ef9157bf71">
+				<ee:message>
+				</ee:message>
+				<ee:variables>
+					<ee:set-variable variableName="output"><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+					<ee:set-variable variableName="foutput"><![CDATA[%dw 2.0
+output application/json
+---
+vars.foutput ++ payload
+]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+					<logger level="INFO" doc:name="Logger" doc:id="587623f2-011d-4ff0-96a7-8eee63e52b1f" message="#[payload]" />
+					<ee:transform doc:name="Transform Message" doc:id="8f7bcf83-6bbd-411d-aa79-3dee5b79271c">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.foutput]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</when>
+				<otherwise>
+					<ee:transform doc:name="Transform Message" doc:id="2c4cf2ec-d38d-4621-af49-7fe604b164c0">
+				<ee:message>
+				</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="ipayload" ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-variable>
+						</ee:variables>
+			</ee:transform>
+					<ee:transform doc:name="Transform Message" doc:id="f3f29f8e-01df-4473-b192-84c5206f8f55">
+						<ee:message>
+							<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.domainNames
+]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+					<foreach doc:name="For Each" doc:id="3551bdeb-f014-43a5-81d8-ae950cec9786" collection="#[payload]">
+						<logger level="INFO" doc:name="Logger" doc:id="8f02f91b-8d3d-4a4b-b10b-6f179ffa8255" message="#[payload]"/>
+						<ee:transform doc:name="Transform Message" doc:id="00dacc75-65af-46bf-bdd7-fee7427ca83c">
+					<ee:message>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="vcore"><![CDATA[%dw 2.0
+
+var c=vars.ipayload map ((item, index) -> {
+"workerType": item.workerType,
+"domain": item.domain,
+"status": item.status,
+}) filter ((item, index) ->  item.domain contains /*startsWith*/ payload.department)
+
+output application/json  
+
+---
+
+c filter ((item, index) ->item.status =="STARTED" ) map ((item, index) -> item.workerType)]]></ee:set-variable>
+					</ee:variables>
+				
+</ee:transform>
+						<ee:transform doc:name="Transform Message" doc:id="3ee4bc34-5c83-4c4f-b004-9ac47609508f">
+							<ee:message>
+							</ee:message>
+							<ee:variables >
+								<ee:set-variable variableName="totalvcores" ><![CDATA[%dw 2.0
+output application/json
+var a=vars.vcore
+var propertiesContent = readUrl("classpath://app.properties", "application/properties")
+var valueMap = propertiesContent
+fun calculateSum(values) = values map(valueMap[$] default 0) reduce ((val,acc) -> val + acc)
+---
+calculateSum(a)]]></ee:set-variable>
+							</ee:variables>
+						</ee:transform>
+						<ee:transform doc:name="Transform Message" doc:id="d498cad5-92ee-45f3-8989-8549908624a4">
+							<ee:message>
+								<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[{
+	"Line of Business": payload.department,
+	"Environment": vars.envname,
+	"No.Of API'S" : sizeOf(vars.vcore),
+	"vCoresUsed" : (vars.totalvcores) as String default 0 as String++ " vcores"
+}]]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<ee:transform doc:name="Transform Message" doc:id="d2ef09f8-2052-4487-a5b9-ea500762f5cc" >
+							<ee:message >
+							</ee:message>
+							<ee:variables >
+								<ee:set-variable variableName="foutput" ><![CDATA[%dw 2.0
+output application/json
+---
+vars.foutput ++ payload]]></ee:set-variable>
+							</ee:variables>
+						</ee:transform>
+						<logger level="INFO" doc:name="Logger" doc:id="b3fc050c-8c5a-4a6f-b8e8-4a89c57935fb" message="#[payload]"/>
+					</foreach>
+			
+
+</otherwise>
+		</choice>
+		</foreach>
+		<ee:transform doc:name="Transform Message" doc:id="7187b314-9dda-4b5f-abde-f8c591967032">
+							<ee:message>
+							</ee:message>
+							<ee:variables>
+								<ee:set-variable variableName="foutput"><![CDATA[%dw 2.0
+output application/json
+---
+vars.foutput
+
+
+
+]]></ee:set-variable>
+							</ee:variables>
+						</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="92500fae-ad1e-4d1b-b1c0-9b9f2e51db8e">
+							<ee:message>
+								<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+
+var inputData = vars.foutput
+
+fun calculateTotalVcores(data, environment) =
+    sum(data filter ($.Environment == environment) map ((item) -> 
+        (item."vCoresUsed" splitBy " ")[0] as Number
+    )) as String
+
+---
+[{
+    "TotalNonProdVCores": calculateTotalVcores(inputData, "Non-Prod") as String,
+    "TotalProdVCores": calculateTotalVcores(inputData, "Prod") as String
+}]
+]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+		<choice doc:name="Choice" doc:id="df63dd61-cdef-4064-8e74-d6e3a20a926c" >
+			<when expression='vars.LineOfBusiness == "sales" or vars.LineOfBusiness == "marketing" or vars.LineOfBusiness == "supplychain"'>
+				<ee:transform doc:name="Transform Message" doc:id="7017a520-ff40-420f-9755-823e647961b3" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+vars.foutput]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="5eecc9be-1545-46b2-b3c3-7376deb39f0f">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.foutput ++ payload]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			</otherwise>
+		</choice>
+		<error-handler ref="global-Error_Handler" />
+	</flow>
+</mule>

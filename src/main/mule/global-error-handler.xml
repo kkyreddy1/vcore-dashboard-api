@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<error-handler name="global-Error_Handler" doc:id="22b3acf2-6005-4255-a6f2-e8621f1790e4" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="8884b865-d823-432c-81c2-a9dd2c4a972d" type="HTTP:NOT_FOUND ">
+			<set-variable value="#[error.errorMessage.attributes.statusCode]" doc:name="httpStatus" doc:id="81c35c7c-176a-4b20-a4a1-76734c1af83d" variableName="httpStatus"/>
+			<ee:transform doc:name="error Message" doc:id="2726407b-2f8f-405f-8d8e-d86bb7372c17" >
+				<ee:message >
+					<ee:set-payload resource="dw/error.dwl" />
+				</ee:message>
+				<ee:variables >
+				</ee:variables>
+			</ee:transform>
+			<logger level="INFO" doc:name="payload" doc:id="1ad8e0e6-986d-4ba6-8980-3fdff35b3929" message="#[payload]" />
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="956692e0-f1fd-4e24-9d59-1964ba4246d6" type="HTTP:METHOD_NOT_ALLOWED">
+			<set-variable value="#[error.errorMessage.attributes.statusCode]" doc:name="httpStatus" doc:id="c640c5b3-1914-4abe-b59b-6108ec6fc6a8" variableName="httpStatus" />
+			<ee:transform doc:name="error Message" doc:id="3b8c8a39-e5ec-4569-b0e8-6346297645f7" >
+				<ee:message >
+					<ee:set-payload resource="dw/error.dwl" />
+				</ee:message>
+				<ee:variables />
+			</ee:transform>
+			<logger level="INFO" doc:name="payload" doc:id="1c9001e8-75ad-4015-a381-c123762cd307" message="#[payload]" />
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="ab4fb739-a432-40f1-a12e-575ab505ca29" type="HTTP:INTERNAL_SERVER_ERROR">
+			<set-variable value="#[error.errorMessage.attributes.statusCode]" doc:name="httpStatus" doc:id="b8eb925c-a74a-407d-b0eb-36c41e906b80" variableName="httpStatus" />
+			<ee:transform doc:name="error Message" doc:id="17ebcc40-71a3-4d9f-9b90-000f3472518c">
+				<ee:message>
+					<ee:set-payload resource="dw/error.dwl" />
+				</ee:message>
+				<ee:variables />
+			</ee:transform>
+			<logger level="INFO" doc:name="payload" doc:id="97d26a2b-719b-48e8-8427-b73ff8277dee" message="#[payload]" />
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="cbc9eef5-4c21-46a8-9d63-8424056b27fb" type="ANY">
+			<set-variable value="#[error.errorMessage.attributes.statusCode]" doc:name="httpStatus" doc:id="c63be661-466d-442f-8ecc-7034477c693f" variableName="httpStatus" />
+			<ee:transform doc:name="error Message" doc:id="d7e4d06f-6025-49fa-9f7d-cbadef48a642">
+				<ee:message>
+					<ee:set-payload resource="dw/error.dwl" />
+				</ee:message>
+				<ee:variables />
+			</ee:transform>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="23e253ca-b8b5-4683-b7d3-a5593ce2af1b" type="MULE:DUPLICATE_MESSAGE">
+			<set-variable value="#[error.errorMessage.attributes.statusCode]" doc:name="httpStatus" doc:id="3566878f-6d8b-49a9-b2d2-6cf6109c8d04" variableName="httpStatus" />
+			<ee:transform doc:name="error Message" doc:id="c83864db-2ca5-4940-86d8-c13af619ee07">
+				<ee:message>
+					<ee:set-payload resource="dw/error.dwl" />
+				</ee:message>
+				<ee:variables />
+			</ee:transform>
+			<logger level="INFO" doc:name="Logger" doc:id="f0b38dd2-f025-4aba-9109-76bd2528e43f" message="#[payload]" />
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="371f6a2a-deb4-4827-8d5a-6a4d663caebd" type="HTTP:BAD_REQUEST">
+			<set-variable value="#[error.errorMessage.attributes.statusCode]" doc:name="httpStatus" doc:id="e942ca8d-5d24-4ce4-a35c-2e8076cb6d45" variableName="httpStatus" />
+			<ee:transform doc:name="error Message" doc:id="dd775c32-8d1c-41c0-8da3-1d40398fbb4e">
+				<ee:message>
+					<ee:set-payload resource="dw/error.dwl" />
+				</ee:message>
+				<ee:variables />
+			</ee:transform>
+			<logger level="INFO" doc:name="Logger" doc:id="d13f52b4-c369-4ca0-bdec-159bc14138fd" message="#[payload]" />
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="21ed66ce-e96d-4119-9e0d-b0a99d54afec" type="HTTP:CONNECTIVITY">
+			<set-variable value="#[error.errorMessage.attributes.statusCode]" doc:name="httpStatus" doc:id="1418eb5b-7cf9-4ca5-bfab-4758d21d111d" variableName="httpStatus" />
+			<ee:transform doc:name="error Message" doc:id="9c8eb1fe-a082-4081-92ae-c697950a3fda" >
+				<ee:message >
+					<ee:set-payload resource="dw/error.dwl" />
+				</ee:message>
+				<ee:variables />
+			</ee:transform>
+			<logger level="INFO" doc:name="Logger" doc:id="0ffe813f-a1e1-4cca-b438-8e7b1bd77ac0" message="#[payload]" />
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="eddbc0ed-da95-4148-80a6-0fe4a8427e02" type="HTTP:UNAUTHORIZED">
+			<set-variable value="#[error.errorMessage.attributes.statusCode]" doc:name="httpStatus" doc:id="1e8eea8f-185d-4da6-b59e-163ae61d2f1e" variableName="httpStatus" />
+			<ee:transform doc:name="error Message" doc:id="6afb9819-9d46-4f77-9943-61fa904026b7">
+				<ee:message>
+					<ee:set-payload resource="dw/error.dwl" />
+				</ee:message>
+				<ee:variables />
+			</ee:transform>
+			<logger level="INFO" doc:name="Logger" doc:id="a020dfca-4e72-4314-a666-2d5e0edb511c" message="#[payload]" />
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="628344e5-d204-44c9-b794-fb033cd94e6c" type="HTTP:FORBIDDEN">
+			<set-variable value="#[error.errorMessage.attributes.statusCode]" doc:name="httpStatus" doc:id="45c587c2-64c1-46b0-84c9-d69134e8b38e" variableName="httpStatus" />
+			<ee:transform doc:name="error Message" doc:id="a91132e1-9e18-44a3-b153-9b26be0e3bc5" >
+				<ee:message >
+					<ee:set-payload resource="dw/error.dwl" />
+				</ee:message>
+				<ee:variables />
+			</ee:transform>
+			<logger level="INFO" doc:name="Logger" doc:id="09de753e-4059-4129-a138-efc47cae3bf6" message="#[payload]" />
+		</on-error-propagate>
+	</error-handler>
+</mule>
