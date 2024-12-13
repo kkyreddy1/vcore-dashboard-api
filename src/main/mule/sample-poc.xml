@@ -23,7 +23,7 @@ output application/json
 ---
 {
     "username": "kkyreddy1",
-    "password": "K@nneluruking101"
+    "password": "..........."
 }]]]></http:body>
 		</http:request>
 		<set-variable value="#[payload.access_token]" doc:name="bearertoken" doc:id="ef51f7f8-317a-4da8-829f-5fe4ed229b32" variableName="bearertoken"/>
